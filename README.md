@@ -1,9 +1,9 @@
-Temporal Segment Network
+TSN
 -
 
 Introduction
 -
-Temporal Segment Network is also called TSN. It can do action recognition. Given a video containing an action, it can recognize the action that is happening. Action recognition is basically video classification. The way TSN does action recognition is very similiar to image classification. First, it picks several segments of the video, which are actually a set of images. Then it does 'image classification' on each of the segment, and averages the results to get the result of the video. Then it can determine the label of the video.
+TSN is the abstraction of Temporal Segment Network. It can do action recognition. Given a video containing an action, it can recognize the action that is happening. Action recognition is basically video classification. The way TSN does action recognition is very similiar to image classification. First, it picks several segments of the video, which are actually a set of images. Then it does 'image classification' on each of the segment, and averages the results to get the result of the video. Then it can determine the label of the video.
 
 The paper where TSN comes from is [Temporal Segment Networks: Towards Good Practices for Deep Action Recognition](http://arxiv.org/abs/1608.00859). The codes in this repository are basically based on [yjxiong
 /tsn-pytorch](https://github.com/yjxiong/tsn-pytorch), which is also the origin code of the paper. [yjxiong/temporal-segment-networks](https://github.com/yjxiong/temporal-segment-networks) is the caffe version code.
