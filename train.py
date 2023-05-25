@@ -156,11 +156,11 @@ def accuracy(predicted_label, label, topk=(1, 5)):
     maxk = max(topk)
     _, predicted_label = predicted_label.topk(maxk, 1, True, True)
     predicted_label = predicted_label.t()
-    correct = predicted_label.eq(label.view(1, -1).expand_as(predicted_label))
+    correct = predicted_label.eq(label.reshape(1, -1).expand_as(predicted_label))
 
     result = []
     for i in topk:
-        correct_i = correct[ : i].view(-1).float().sum(0)
+        correct_i = correct[ : i].reshape(-1).float().sum(0)
         result += [correct_i / args.batch_size * 100.0]
 
     return result
