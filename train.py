@@ -35,6 +35,21 @@ parser.add_argument('--print_every', default=20, type=int)
 parser.add_argument('--validation_every', default=5, type=int)
 args = parser.parse_args()
 
+# set seed for reproducibility
+def set_random_seed(random_seed=None):
+    """
+    Using random seed for numpy and torch
+    """
+    if(random_seed is None):
+        random_seed = 8
+    os.environ['PYTHONHASHSEED'] = str(random_seed)
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+    torch.cuda.manual_seed_all(random_seed)
+    return
+
+set_random_seed(74)
+
 cudnn.benchmark = True
 
 if not os.path.exists('trained_model'):
