@@ -6,27 +6,31 @@ import tf_model_zoo
 
 class ConsensusFunction(torch.autograd.Function):
 
-    def __init__(self, consensus_type, dim=1):
-        self.consensus_type = consensus_type
-        self.dim = dim
-        self.shape = None
-
-    def forward(self, x):
-        self.shape = x.size()
-        if self.consensus_type == 'avg':
-            x = x.mean(dim=self.dim, keepdim=True)
-        if self.consensus_type == 'identity':
+    @staticmethod
+    def forward(ctx, x, consensus_type, dim=1):
+        ctx.consensus_type = consensus_type
+        ctx.dim = dim
+        ctx.save_for_backward(x)
+        shape = x.size()
+        if consensus_type == 'avg':
+            x = x.mean(dim=dim, keepdim=True)
+        if consensus_type == 'identity':
             x = x
 
         return x
-
-    def backward(self, dout):
-        if self.consensus_type == 'avg':
-            din = dout.expand(self.shape) / float(self.shape[self.dim])
-        if self.consensus_type == 'identity':
+    
+    @staticmethod
+    def backward(ctx, dout):
+        x, = ctx.saved_tensors
+        consensus_type = ctx.consensus_type
+        dim = ctx.dim
+        shape = x.size()
+        if consensus_type == 'avg':
+            din = dout.expand(shape) / float(shape[dim])
+        if consensus_type == 'identity':
             din = dout
 
-        return din
+        return din, None, None
 
 class Consensus(nn.Module):
 
@@ -37,7 +41,7 @@ class Consensus(nn.Module):
 
     def forward(self, x):
 
-        return ConsensusFunction(self.consensus_type, self.dim)(x)
+        return ConsensusFunction.apply(x, self.consensus_type, self.dim)
 
 class TSN(nn.Module):
 
@@ -78,8 +82,12 @@ class TSN(nn.Module):
             self.softmax = nn.Softmax()
 
     def _prepare_base_model(self):
-        if 'vgg' in self.base_model or 'resnet' in self.base_model:
-            self.base_model = getattr(torchvision.models, self.base_model)(True)
+        if 'vgg' in self.base_model:
+            self.base_model = torchvision.models.vgg16(weights = torchvision.models.VGG16_Weights.DEFAULT)
+            self.base_model.last_layer_name = 'fc'
+            return
+        if 'resnet' in self.base_model:
+            self.base_model = torchvision.models.resnet18(weights = torchvision.models.ResNet18_Weights.DEFAULT)
             self.base_model.last_layer_name = 'fc'
             return
         if self.base_model == 'BNInception':
